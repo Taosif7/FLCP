@@ -1,6 +1,7 @@
 name: flcp
 description: A sample command-line application with basic argument parsing.
-version: 0.0.1
+repository: https://github.com/Taosif7/flcp
+version: 1.0.0
 # repository: https://github.com/my_org/my_repo
 
 environment:

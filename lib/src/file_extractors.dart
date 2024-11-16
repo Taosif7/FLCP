@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:flcp/src/cli_utils.dart';
 import 'package:flcp/src/release_item.dart';
 
 class FileExtractors {
@@ -12,15 +13,19 @@ class FileExtractors {
     List<ReleaseItem> buildFiles = [];
 
     if (apk) {
+      CLIUtils.printVerbose("Adding APK files...");
       buildFiles.addAll(extractAPKReleaseFiles());
     }
     if (aab) {
+      CLIUtils.printVerbose("Adding AAB files...");
       buildFiles.addAll(extractAABReleaseFiles());
     }
     if (ios) {
+      CLIUtils.printVerbose("Adding IPA files...");
       buildFiles.addAll(extractIPAReleaseFiles());
     }
     if (web) {
+      CLIUtils.printVerbose("Adding Web files...");
       buildFiles.addAll(extractWebReleaseFiles());
     }
 
@@ -31,6 +36,7 @@ class FileExtractors {
     directory ??= Directory('build/app/outputs/apk/');
 
     if (directory.existsSync() == false) {
+      CLIUtils.printVerbose("APK directory not found");
       return [];
     }
 
@@ -43,6 +49,8 @@ class FileExtractors {
             fileName.split('-').sublist(1).join("-").split(".").first;
         String buildType = fileName.split('-').last.split(".").first;
         flavor = flavor.replaceAll("-$buildType", "");
+
+        CLIUtils.printVerbose("APK Found: $fileName");
 
         if (flavor == 'debug') {
           return;
@@ -66,6 +74,7 @@ class FileExtractors {
     directory ??= Directory('build/app/outputs/aab/');
 
     if (directory.existsSync() == false) {
+      CLIUtils.printVerbose("AAB directory not found");
       return [];
     }
 
@@ -78,6 +87,8 @@ class FileExtractors {
             fileName.split('-').sublist(1).join("-").split(".").first;
         String buildType = fileName.split('-').last.split(".").first;
         flavor = flavor.replaceAll("-$buildType", "");
+
+        CLIUtils.printVerbose("AAB Found: $fileName");
 
         if (flavor == 'debug') {
           return;
@@ -101,6 +112,7 @@ class FileExtractors {
     directory ??= Directory('build/ios/ipa/');
 
     if (directory.existsSync() == false) {
+      CLIUtils.printVerbose("IPA directory not found");
       return [];
     }
 
@@ -109,6 +121,8 @@ class FileExtractors {
     directory.listSync().forEach((element) {
       if (element is File && element.path.endsWith(".ipa")) {
         String fileName = element.path.split('/').last;
+
+        CLIUtils.printVerbose("IPA Found: $fileName");
 
         // Handle different iOS build naming patterns
         // Example: AppName-Flavor-1.0.0-release.ipa
@@ -160,10 +174,13 @@ class FileExtractors {
     directory ??= Directory('build/web/');
 
     if (directory.existsSync() == false) {
+      CLIUtils.printVerbose("Web directory not found");
       return [];
     }
 
     List<ReleaseItem> files = [];
+
+    CLIUtils.printVerbose("Web Build Found: ${directory.path}");
 
     files.add(
       ReleaseItem(

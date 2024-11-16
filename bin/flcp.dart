@@ -1,13 +1,14 @@
 import 'dart:io';
 
 import 'package:args/args.dart';
+import 'package:flcp/src/cli_utils.dart';
 import 'package:flcp/src/file_extractors.dart';
 import 'package:flcp/src/file_utils.dart';
 import 'package:flcp/src/pubspec_utils.dart';
 import 'package:flcp/src/release_item.dart';
 import 'package:pubspec_parse/pubspec_parse.dart';
 
-const String version = '0.0.1';
+const String version = '1.0.0';
 
 ArgParser buildParser() {
   return ArgParser()
@@ -46,7 +47,6 @@ void main(List<String> arguments) {
   final ArgParser argParser = buildParser();
   try {
     final ArgResults results = argParser.parse(arguments);
-    bool verbose = false;
     bool includeDate = true;
 
     // Process the parsed arguments.
@@ -59,7 +59,7 @@ void main(List<String> arguments) {
       return;
     }
     if (results.wasParsed('verbose')) {
-      verbose = true;
+      CLIUtils.verbose = true;
     }
     if (results.wasParsed('no-date')) {
       includeDate = false;
@@ -67,13 +67,16 @@ void main(List<String> arguments) {
 
     // Read project info
 
-    printInfo("Reading project info...");
+    CLIUtils.printVerbose("Verbose mode enabled");
+
+    CLIUtils.printInfo("Reading project info...");
 
     var pubspecFile = PubspecUtils().getPubspecFile();
 
     if (pubspecFile == null) {
-      printError('pubspec.yaml file not found');
-      print("Please run this command in the root of your flutter project");
+      CLIUtils.printError('pubspec.yaml file not found');
+      CLIUtils.printWarning(
+          "Please run this command in the root of your flutter project");
       return;
     }
 
@@ -81,13 +84,14 @@ void main(List<String> arguments) {
     try {
       pubspec = Pubspec.parse(pubspecFile.readAsStringSync());
     } catch (e) {
-      printError("Error reading pubspec.yaml file");
+      CLIUtils.printVerbose(e.toString());
+      CLIUtils.printError("Error reading pubspec.yaml file");
       return;
     }
 
     // Find build files
 
-    printInfo("Finding build files across the project...");
+    CLIUtils.printInfo("Finding build files across the project...");
 
     List<String> supportedPlatformsAndFiles = [
       "android",
@@ -116,20 +120,22 @@ void main(List<String> arguments) {
     );
 
     if (releases.isEmpty) {
-      printError('No build files found');
+      CLIUtils.printError('No build files found');
       return;
     }
 
-    printSuccess("Found ${releases.length} build files:");
+    CLIUtils.printSuccess("Found ${releases.length} build files:");
     for (int i = 0; i < releases.length; i++) {
       print("    ${i + 1}) ${releases[i].type.name} - ${releases[i].fileName}");
     }
 
     // Copy build files to Desktop
 
-    printInfo("Copying build files to Desktop...");
+    CLIUtils.printInfo("Copying build files to Desktop...");
 
     Directory? desktopPath = FileUtils().getDesktopPath();
+
+    CLIUtils.printVerbose("Desktop path: ${desktopPath?.path}");
 
     if (desktopPath == null) {
       print('Unsupported platform');
@@ -143,26 +149,10 @@ void main(List<String> arguments) {
       includeDate,
     );
 
-    printSuccess("Copied ${releases.length} build files to Desktop");
+    CLIUtils.printSuccess("Copied ${releases.length} build files to Desktop");
   } on FormatException catch (e) {
     // Print usage information if an invalid argument was provided.
-    printError(e.message);
+    CLIUtils.printError(e.message);
     printUsage(argParser);
   }
-}
-
-void printError(String message) {
-  print('❌  $message');
-}
-
-void printWarning(String message) {
-  print('⚠️ $message');
-}
-
-void printInfo(String message) {
-  print('ℹ️ $message');
-}
-
-void printSuccess(String message) {
-  print('✅  $message');
 }

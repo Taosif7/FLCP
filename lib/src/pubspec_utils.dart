@@ -1,19 +1,23 @@
 import 'dart:io';
 
+import 'package:flcp/src/cli_utils.dart';
 import 'package:pubspec_parse/pubspec_parse.dart';
 
 class PubspecUtils {
-  File? getPubspecFile() {
+  File? getPubspecFile([bool verbose = false]) {
     var pubspecFile = File('pubspec.yaml');
 
     if (!pubspecFile.existsSync()) {
       // Try once more in parent directory (in case if user is in a platform directory)
+      CLIUtils.printVerbose(
+          'pubspec.yaml not found in current directory, checking in parent directory');
       pubspecFile = File('../pubspec.yaml');
 
       // And if it still doesn't exist, then it's not a flutter project
       if (pubspecFile.existsSync()) {
         return pubspecFile;
       } else {
+        CLIUtils.printVerbose('pubspec.yaml not found in parent directory');
         return null;
       }
     } else {
