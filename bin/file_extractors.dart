@@ -20,10 +20,6 @@ class FileExtractors {
         String buildType = fileName.split('-').last.split(".").first;
         flavor = flavor.replaceAll("-$buildType", "");
 
-        if (flavor.isEmpty) {
-          flavor = directory!.path.split("/").last;
-        }
-
         if (flavor == 'debug') {
           return;
         }
@@ -58,10 +54,6 @@ class FileExtractors {
             fileName.split('-').sublist(1).join("-").split(".").first;
         String buildType = fileName.split('-').last.split(".").first;
         flavor = flavor.replaceAll("-$buildType", "");
-
-        if (flavor.isEmpty) {
-          flavor = directory!.path.split("/").last;
-        }
 
         if (flavor == 'debug') {
           return;
@@ -152,7 +144,7 @@ class FileExtractors {
     files.add(
       ReleaseItem(
         path: directory.path,
-        flavor: '',
+        flavor: null,
         type: ReleaseType.web,
         buildType: 'release',
       ),

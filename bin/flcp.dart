@@ -1,9 +1,12 @@
 import 'dart:io';
 
 import 'package:args/args.dart';
+import 'package:pubspec_parse/pubspec_parse.dart';
 
 import 'file_extractors.dart';
 import 'release_item.dart';
+import 'utils.dart';
+import 'zip_utility.dart';
 
 const String version = '0.0.1';
 
@@ -52,38 +55,80 @@ void main(List<String> arguments) {
       verbose = true;
     }
 
-    String? desktopPath = _getDesktopPath();
+    // Read project info
 
-    if (desktopPath == null) {
-      print('Unsupported platform');
+    printInfo("Reading project info...");
+
+    var pubspecFile = PubspecUtils().getPubspecFile();
+
+    if (pubspecFile == null) {
+      printError('pubspec.yaml file not found');
+      print("Please run this command in the root of your flutter project");
       return;
-    } else {
-      desktopPath += '/Desktop';
-      if (verbose) {
-        print('Desktop path: $desktopPath');
-      }
     }
+
+    Pubspec pubspec;
+    try {
+      pubspec = Pubspec.parse(pubspecFile.readAsStringSync());
+    } catch (e) {
+      printError("Error reading pubspec.yaml file");
+      return;
+    }
+
+    // Find build files
 
     printInfo("Finding build files across the project...");
 
-    List<ReleaseItem> getReleases = _getBuildFiles(
-      apk: arguments.contains("android") || arguments.contains("apk"),
-      aab: arguments.contains("android") || arguments.contains("aab"),
-      ios: arguments.contains("ios") || arguments.contains("ipa"),
-      web: arguments.contains("web"),
+    List<String> supportedPlatformsAndFiles = [
+      "android",
+      "ios",
+      "web",
+      "apk",
+      "aab",
+      "ipa"
+    ];
+
+    bool noExplicitPlatform = arguments
+            .any((platform) => supportedPlatformsAndFiles.contains(platform)) ==
+        false;
+
+    List<ReleaseItem> releases = _getBuildFiles(
+      apk: noExplicitPlatform ||
+          arguments.contains("android") ||
+          arguments.contains("apk"),
+      aab: noExplicitPlatform ||
+          arguments.contains("android") ||
+          arguments.contains("aab"),
+      ios: noExplicitPlatform ||
+          arguments.contains("ios") ||
+          arguments.contains("ipa"),
+      web: noExplicitPlatform || arguments.contains("web"),
     );
-    if (getReleases.isEmpty) {
+
+    if (releases.isEmpty) {
       printError('No build files found');
       return;
     }
 
-    printSuccess("Found ${getReleases.length} build files:");
-    for (int i = 0; i < getReleases.length; i++) {
-      print(
-          "    ${i + 1}) ${getReleases[i].type.name} - ${getReleases[i].fileName}");
+    printSuccess("Found ${releases.length} build files:");
+    for (int i = 0; i < releases.length; i++) {
+      print("    ${i + 1}) ${releases[i].type.name} - ${releases[i].fileName}");
     }
 
+    // Copy build files to Desktop
+
     printInfo("Copying build files to Desktop...");
+
+    Directory? desktopPath = _getDesktopPath();
+
+    if (desktopPath == null) {
+      print('Unsupported platform');
+      return;
+    }
+
+    _copyReleaseFiles(desktopPath, releases, pubspec);
+
+    printSuccess("Copied ${releases.length} build files to Desktop");
   } on FormatException catch (e) {
     // Print usage information if an invalid argument was provided.
     printError(e.message);
@@ -92,7 +137,7 @@ void main(List<String> arguments) {
 }
 
 void printError(String message) {
-  print('❌ $message');
+  print('❌  $message');
 }
 
 void printWarning(String message) {
@@ -104,7 +149,7 @@ void printInfo(String message) {
 }
 
 void printSuccess(String message) {
-  print('✅ $message');
+  print('✅  $message');
 }
 
 List<ReleaseItem> _getBuildFiles({
@@ -131,10 +176,47 @@ List<ReleaseItem> _getBuildFiles({
   return buildFiles;
 }
 
-String? _getDesktopPath() {
+List<File> _copyReleaseFiles(
+  Directory targetDir,
+  List<ReleaseItem> releaseItems,
+  Pubspec pubspec,
+) {
+  List<File> copiedFiles = [];
+  for (ReleaseItem releaseItem in releaseItems) {
+    if (releaseItem.type == ReleaseType.web) {
+      Directory webReleaseDir = Directory(releaseItem.path);
+      String releaseName = PubspecUtils().getReleaseFileName(
+        pubspec,
+        additionalSuffixes: ['web'],
+      );
+      String zipFilePath = "${targetDir.path}/$releaseName.zip";
+      ZipUtility zipUtility = ZipUtility();
+      zipUtility.zipFiles(webReleaseDir, zipFilePath);
+    } else {
+      File file = File(releaseItem.path);
+      String releaseName = PubspecUtils().getReleaseFileName(
+        pubspec,
+        additionalSuffixes: [releaseItem.flavor, releaseItem.buildType],
+      );
+      File newFile = File(
+        '${targetDir.path}/$releaseName.${releaseItem.type.name}',
+      );
+      file.copy(newFile.path);
+      copiedFiles.add(newFile);
+    }
+  }
+  return copiedFiles;
+}
+
+Directory? _getDesktopPath() {
+  Directory? dir;
   if (Platform.isMacOS) {
-    return Platform.environment['HOME'];
+    dir = Directory("${Platform.environment['HOME']}/Desktop");
   } else if (Platform.isWindows) {
   } else if (Platform.isLinux) {}
+
+  if (dir != null && dir.existsSync()) {
+    return dir;
+  }
   return null;
 }
