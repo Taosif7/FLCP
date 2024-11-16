@@ -28,6 +28,13 @@ ArgParser buildParser() {
       'version',
       negatable: false,
       help: 'Print the tool version.',
+    )
+    ..addFlag(
+      'no-date',
+      negatable: false,
+      abbr: 'd',
+      defaultsTo: false,
+      help: 'Do not include the date in the release file name.',
     );
 }
 
@@ -41,6 +48,7 @@ void main(List<String> arguments) {
   try {
     final ArgResults results = argParser.parse(arguments);
     bool verbose = false;
+    bool includeDate = true;
 
     // Process the parsed arguments.
     if (results.wasParsed('help')) {
@@ -53,6 +61,9 @@ void main(List<String> arguments) {
     }
     if (results.wasParsed('verbose')) {
       verbose = true;
+    }
+    if (results.wasParsed('no-date')) {
+      includeDate = false;
     }
 
     // Read project info
@@ -126,7 +137,12 @@ void main(List<String> arguments) {
       return;
     }
 
-    _copyReleaseFiles(desktopPath, releases, pubspec);
+    _copyReleaseFiles(
+      desktopPath,
+      releases,
+      pubspec,
+      includeDate,
+    );
 
     printSuccess("Copied ${releases.length} build files to Desktop");
   } on FormatException catch (e) {
@@ -180,6 +196,7 @@ List<File> _copyReleaseFiles(
   Directory targetDir,
   List<ReleaseItem> releaseItems,
   Pubspec pubspec,
+  bool includeDateInFileName,
 ) {
   List<File> copiedFiles = [];
   for (ReleaseItem releaseItem in releaseItems) {
@@ -188,6 +205,7 @@ List<File> _copyReleaseFiles(
       String releaseName = PubspecUtils().getReleaseFileName(
         pubspec,
         additionalSuffixes: ['web'],
+        includeDate: includeDateInFileName,
       );
       String zipFilePath = "${targetDir.path}/$releaseName.zip";
       ZipUtility zipUtility = ZipUtility();
@@ -197,6 +215,7 @@ List<File> _copyReleaseFiles(
       String releaseName = PubspecUtils().getReleaseFileName(
         pubspec,
         additionalSuffixes: [releaseItem.flavor, releaseItem.buildType],
+        includeDate: includeDateInFileName,
       );
       File newFile = File(
         '${targetDir.path}/$releaseName.${releaseItem.type.name}',

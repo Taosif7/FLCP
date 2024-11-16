@@ -24,13 +24,11 @@ class PubspecUtils {
   String getReleaseFileName(
     Pubspec pubspec, {
     List<String?> additionalSuffixes = const [],
+    bool includeDate = true,
   }) {
     String projectName = pubspec.name;
     String versionName = pubspec.version.toString().split('+').first;
     String buildNumber = pubspec.version.toString().split('+').last;
-    DateTime now = DateTime.now();
-    String formattedDate =
-        '${now.day.toString().padLeft(2, '0')}${now.month.toString().padLeft(2, '0')}${now.year.toString().substring(2)}';
 
     String filename = projectName;
 
@@ -41,7 +39,15 @@ class PubspecUtils {
     filename += additionalSuffixes.isNotEmpty
         ? '_${additionalSuffixes.whereType<String>().join('_')}'
         : '';
-    filename += '_v$versionName($buildNumber)_$formattedDate';
+    filename += '_v$versionName($buildNumber)';
+
+    if (includeDate) {
+      DateTime now = DateTime.now();
+      String formattedDate =
+          '${now.day.toString().padLeft(2, '0')}${now.month.toString().padLeft(2, '0')}${now.year.toString().substring(2)}';
+
+      filename += '_$formattedDate';
+    }
 
     return filename;
   }
