@@ -1,8 +1,32 @@
 import 'dart:io';
 
-import 'release_item.dart';
+import 'package:flcp/src/release_item.dart';
 
 class FileExtractors {
+  List<ReleaseItem> getBuildFiles({
+    bool apk = true,
+    bool aab = true,
+    bool ios = true,
+    bool web = true,
+  }) {
+    List<ReleaseItem> buildFiles = [];
+
+    if (apk) {
+      buildFiles.addAll(extractAPKReleaseFiles());
+    }
+    if (aab) {
+      buildFiles.addAll(extractAABReleaseFiles());
+    }
+    if (ios) {
+      buildFiles.addAll(extractIPAReleaseFiles());
+    }
+    if (web) {
+      buildFiles.addAll(extractWebReleaseFiles());
+    }
+
+    return buildFiles;
+  }
+
   List<ReleaseItem> extractAPKReleaseFiles([Directory? directory]) {
     directory ??= Directory('build/app/outputs/apk/');
 

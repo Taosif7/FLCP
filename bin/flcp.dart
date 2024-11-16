@@ -1,12 +1,11 @@
 import 'dart:io';
 
 import 'package:args/args.dart';
+import 'package:flcp/src/file_extractors.dart';
+import 'package:flcp/src/file_utils.dart';
+import 'package:flcp/src/pubspec_utils.dart';
+import 'package:flcp/src/release_item.dart';
 import 'package:pubspec_parse/pubspec_parse.dart';
-
-import 'file_extractors.dart';
-import 'release_item.dart';
-import 'utils.dart';
-import 'zip_utility.dart';
 
 const String version = '0.0.1';
 
@@ -103,7 +102,7 @@ void main(List<String> arguments) {
             .any((platform) => supportedPlatformsAndFiles.contains(platform)) ==
         false;
 
-    List<ReleaseItem> releases = _getBuildFiles(
+    List<ReleaseItem> releases = FileExtractors().getBuildFiles(
       apk: noExplicitPlatform ||
           arguments.contains("android") ||
           arguments.contains("apk"),
@@ -130,14 +129,14 @@ void main(List<String> arguments) {
 
     printInfo("Copying build files to Desktop...");
 
-    Directory? desktopPath = _getDesktopPath();
+    Directory? desktopPath = FileUtils().getDesktopPath();
 
     if (desktopPath == null) {
       print('Unsupported platform');
       return;
     }
 
-    _copyReleaseFiles(
+    FileUtils().copyReleaseFiles(
       desktopPath,
       releases,
       pubspec,
@@ -166,76 +165,4 @@ void printInfo(String message) {
 
 void printSuccess(String message) {
   print('✅  $message');
-}
-
-List<ReleaseItem> _getBuildFiles({
-  bool apk = true,
-  bool aab = true,
-  bool ios = true,
-  bool web = true,
-}) {
-  List<ReleaseItem> buildFiles = [];
-
-  if (apk) {
-    buildFiles.addAll(FileExtractors().extractAPKReleaseFiles());
-  }
-  if (aab) {
-    buildFiles.addAll(FileExtractors().extractAABReleaseFiles());
-  }
-  if (ios) {
-    buildFiles.addAll(FileExtractors().extractIPAReleaseFiles());
-  }
-  if (web) {
-    buildFiles.addAll(FileExtractors().extractWebReleaseFiles());
-  }
-
-  return buildFiles;
-}
-
-List<File> _copyReleaseFiles(
-  Directory targetDir,
-  List<ReleaseItem> releaseItems,
-  Pubspec pubspec,
-  bool includeDateInFileName,
-) {
-  List<File> copiedFiles = [];
-  for (ReleaseItem releaseItem in releaseItems) {
-    if (releaseItem.type == ReleaseType.web) {
-      Directory webReleaseDir = Directory(releaseItem.path);
-      String releaseName = PubspecUtils().getReleaseFileName(
-        pubspec,
-        additionalSuffixes: ['web'],
-        includeDate: includeDateInFileName,
-      );
-      String zipFilePath = "${targetDir.path}/$releaseName.zip";
-      ZipUtility zipUtility = ZipUtility();
-      zipUtility.zipFiles(webReleaseDir, zipFilePath);
-    } else {
-      File file = File(releaseItem.path);
-      String releaseName = PubspecUtils().getReleaseFileName(
-        pubspec,
-        additionalSuffixes: [releaseItem.flavor, releaseItem.buildType],
-        includeDate: includeDateInFileName,
-      );
-      File newFile = File(
-        '${targetDir.path}/$releaseName.${releaseItem.type.name}',
-      );
-      file.copy(newFile.path);
-      copiedFiles.add(newFile);
-    }
-  }
-  return copiedFiles;
-}
-
-Directory? _getDesktopPath() {
-  Directory? dir;
-  if (Platform.isMacOS) {
-    dir = Directory("${Platform.environment['HOME']}/Desktop");
-  } else if (Platform.isWindows) {
-  } else if (Platform.isLinux) {}
-
-  if (dir != null && dir.existsSync()) {
-    return dir;
-  }
-  return null;
 }
