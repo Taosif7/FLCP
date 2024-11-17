@@ -117,6 +117,12 @@ void main(List<String> arguments) {
           arguments.contains("ios") ||
           arguments.contains("ipa"),
       web: noExplicitPlatform || arguments.contains("web"),
+      msix: noExplicitPlatform ||
+          arguments.contains("windows") ||
+          arguments.contains("msix"),
+      exe: noExplicitPlatform ||
+          arguments.contains("windows") ||
+          arguments.contains("exe"),
     );
 
     if (releases.isEmpty) {

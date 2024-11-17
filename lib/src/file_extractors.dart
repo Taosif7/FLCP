@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:flcp/src/cli_utils.dart';
+import 'package:flcp/src/extensions.dart';
 import 'package:flcp/src/release_item.dart';
 
 class FileExtractors {
@@ -9,6 +10,8 @@ class FileExtractors {
     bool aab = true,
     bool ios = true,
     bool web = true,
+    bool msix = true,
+    bool exe = true,
   }) {
     List<ReleaseItem> buildFiles = [];
 
@@ -28,6 +31,14 @@ class FileExtractors {
       CLIUtils.printVerbose("Adding Web files...");
       buildFiles.addAll(extractWebReleaseFiles());
     }
+    if (msix) {
+      CLIUtils.printVerbose("Adding MSIX files...");
+      buildFiles.addAll(extractMSIXReleaseFiles());
+    }
+    if (exe) {
+      CLIUtils.printVerbose("Adding EXE files...");
+      buildFiles.addAll(extractEXEReleaseFiles());
+    }
 
     return buildFiles;
   }
@@ -36,7 +47,7 @@ class FileExtractors {
     directory ??= Directory('build/app/outputs/apk/');
 
     if (directory.existsSync() == false) {
-      CLIUtils.printVerbose("APK directory not found");
+      CLIUtils.printVerbose("APK build directory not found");
       return [];
     }
 
@@ -44,7 +55,7 @@ class FileExtractors {
 
     directory.listSync().forEach((element) {
       if (element is File && element.path.endsWith(".apk")) {
-        String fileName = element.path.split('/').last;
+        String fileName = element.path.filename;
         String flavor =
             fileName.split('-').sublist(1).join("-").split(".").first;
         String buildType = fileName.split('-').last.split(".").first;
@@ -74,7 +85,7 @@ class FileExtractors {
     directory ??= Directory('build/app/outputs/aab/');
 
     if (directory.existsSync() == false) {
-      CLIUtils.printVerbose("AAB directory not found");
+      CLIUtils.printVerbose("AAB build directory not found");
       return [];
     }
 
@@ -82,7 +93,7 @@ class FileExtractors {
 
     directory.listSync().forEach((element) {
       if (element is File && element.path.endsWith(".apk")) {
-        String fileName = element.path.split('/').last;
+        String fileName = element.path.filename;
         String flavor =
             fileName.split('-').sublist(1).join("-").split(".").first;
         String buildType = fileName.split('-').last.split(".").first;
@@ -112,7 +123,7 @@ class FileExtractors {
     directory ??= Directory('build/ios/ipa/');
 
     if (directory.existsSync() == false) {
-      CLIUtils.printVerbose("IPA directory not found");
+      CLIUtils.printVerbose("IPA build directory not found");
       return [];
     }
 
@@ -120,7 +131,7 @@ class FileExtractors {
 
     directory.listSync().forEach((element) {
       if (element is File && element.path.endsWith(".ipa")) {
-        String fileName = element.path.split('/').last;
+        String fileName = element.path.filename;
 
         CLIUtils.printVerbose("IPA Found: $fileName");
 
@@ -174,7 +185,7 @@ class FileExtractors {
     directory ??= Directory('build/web/');
 
     if (directory.existsSync() == false) {
-      CLIUtils.printVerbose("Web directory not found");
+      CLIUtils.printVerbose("Web build directory not found");
       return [];
     }
 
@@ -187,6 +198,62 @@ class FileExtractors {
         path: directory.path,
         flavor: null,
         type: ReleaseType.web,
+        buildType: 'release',
+      ),
+    );
+
+    return files;
+  }
+
+  List<ReleaseItem> extractMSIXReleaseFiles([Directory? directory]) {
+    directory ??= Directory('build/windows/runner/Release/');
+
+    if (directory.existsSync() == false) {
+      CLIUtils.printVerbose("MSIX build directory not found");
+      return [];
+    }
+
+    List<ReleaseItem> files = [];
+
+    CLIUtils.printVerbose("MSIX Build Found: ${directory.path}");
+
+    var dirFiles = directory.listSync();
+
+    for (var item in dirFiles) {
+      if (item is File) {
+        if (item.path.endsWith(".msix")) {
+          files.add(
+            ReleaseItem(
+              path: item.path,
+              flavor: 'release',
+              buildType: 'msix',
+              type: ReleaseType.msix,
+            ),
+          );
+        }
+      }
+    }
+
+    return files;
+  }
+
+  List<ReleaseItem> extractEXEReleaseFiles([Directory? directory]) {
+    directory ??= Directory('build/windows/runner/Release/');
+
+    if (directory.existsSync() == false) {
+      CLIUtils.printVerbose("EXE build directory not found");
+      return [];
+    }
+
+    List<ReleaseItem> files = [];
+
+    CLIUtils.printVerbose("Windows Build Found: ${directory.path}");
+
+    files.add(
+      ReleaseItem(
+        path: directory.path,
+        flavor: 'windows',
+        type: ReleaseType.exe,
         buildType: 'release',
       ),
     );

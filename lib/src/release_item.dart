@@ -1,8 +1,17 @@
+import 'package:flcp/src/extensions.dart';
+
 enum ReleaseType {
-  apk,
-  aab,
-  ipa,
-  web,
+  apk(false, 'apk'),
+  aab(false, 'aab'),
+  ipa(false, 'ipa'),
+  web(true, 'zip'),
+  exe(true, 'zip'),
+  msix(false, 'msix');
+
+  final bool isFolder;
+  final String extension;
+
+  const ReleaseType(this.isFolder, this.extension);
 }
 
 class ReleaseItem {
@@ -12,10 +21,10 @@ class ReleaseItem {
   final String? buildType;
 
   String get fileName {
-    if (type == ReleaseType.web) {
+    if (type == ReleaseType.web || type == ReleaseType.exe) {
       return 'folder';
     } else {
-      return path.split('/').last;
+      return path.filename;
     }
   }
 
