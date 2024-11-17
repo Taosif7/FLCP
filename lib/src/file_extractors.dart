@@ -206,10 +206,18 @@ class FileExtractors {
   }
 
   List<ReleaseItem> extractMSIXReleaseFiles([Directory? directory]) {
-    directory ??= Directory('build/windows/runner/Release/');
+    directory ??= Directory('build/windows/x64/runner/Release/');
 
     if (directory.existsSync() == false) {
-      CLIUtils.printVerbose("MSIX build directory not found");
+      CLIUtils.printVerbose("EXE build directory not found: ${directory.path}");
+      directory = Directory('build/windows/runner/Release/');
+    }
+    if (directory.existsSync() == false) {
+      CLIUtils.printVerbose("EXE build directory not found: ${directory.path}");
+      directory = Directory('build/windows/arm64/runner/Release/');
+    }
+    if (directory.existsSync() == false) {
+      CLIUtils.printVerbose("EXE build directory not found: ${directory.path}");
       return [];
     }
 
@@ -238,10 +246,18 @@ class FileExtractors {
   }
 
   List<ReleaseItem> extractEXEReleaseFiles([Directory? directory]) {
-    directory ??= Directory('build/windows/runner/Release/');
+    directory ??= Directory('build/windows/x64/runner/Release/');
 
     if (directory.existsSync() == false) {
-      CLIUtils.printVerbose("EXE build directory not found");
+      CLIUtils.printVerbose("EXE build directory not found: ${directory.path}");
+      directory = Directory('build/windows/runner/Release/');
+    }
+    if (directory.existsSync() == false) {
+      CLIUtils.printVerbose("EXE build directory not found: ${directory.path}");
+      directory = Directory('build/windows/arm64/runner/Release/');
+    }
+    if (directory.existsSync() == false) {
+      CLIUtils.printVerbose("EXE build directory not found: ${directory.path}");
       return [];
     }
 
