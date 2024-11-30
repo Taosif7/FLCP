@@ -44,7 +44,7 @@ class FileExtractors {
   }
 
   List<ReleaseItem> extractAPKReleaseFiles([Directory? directory]) {
-    directory ??= Directory('build/app/outputs/apk/');
+    directory ??= Directory('build/app/outputs/flutter-apk/');
 
     if (directory.existsSync() == false) {
       CLIUtils.printVerbose("APK build directory not found");
@@ -54,7 +54,7 @@ class FileExtractors {
     List<ReleaseItem> files = [];
 
     directory.listSync().forEach((element) {
-      if (element is File && element.path.endsWith(".apk")) {
+      if (element is File && element.path.endsWith("-release.apk")) {
         String fileName = element.path.filename;
         String flavor =
             fileName.split('-').sublist(1).join("-").split(".").first;
