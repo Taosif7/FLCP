@@ -27,7 +27,7 @@ class PubspecUtils {
 
   String getReleaseFileName(
     Pubspec pubspec, {
-    List<String?> additionalSuffixes = const [],
+    Set<String?> additionalSuffixes = const {},
     bool includeDate = true,
   }) {
     String projectName = pubspec.name;
@@ -38,8 +38,9 @@ class PubspecUtils {
 
     additionalSuffixes = additionalSuffixes
         .whereType<String>()
-        .where((e) => e.isNotEmpty)
-        .toList();
+        .where((e) => e.isNotEmpty && e != projectName)
+        .map((e) => e.replaceAll(' ', '_').toLowerCase())
+        .toSet();
     filename += additionalSuffixes.isNotEmpty
         ? '_${additionalSuffixes.whereType<String>().join('_')}'
         : '';

@@ -35,7 +35,7 @@ class FileUtils {
         Directory exeReleaseDir = Directory(releaseItem.path);
         String releaseName = PubspecUtils().getReleaseFileName(
           pubspec,
-          additionalSuffixes: ['windows'],
+          additionalSuffixes: {'windows'},
           includeDate: includeDateInFileName,
         );
         String zipFilePath = "${targetDir.path}/$releaseName.zip";
@@ -52,7 +52,7 @@ class FileUtils {
         Directory webReleaseDir = Directory(releaseItem.path);
         String releaseName = PubspecUtils().getReleaseFileName(
           pubspec,
-          additionalSuffixes: ['web'],
+          additionalSuffixes: {'web'},
           includeDate: includeDateInFileName,
         );
         String zipFilePath = "${targetDir.path}/$releaseName.zip";
@@ -62,7 +62,7 @@ class FileUtils {
         File file = File(releaseItem.path);
         String releaseName = PubspecUtils().getReleaseFileName(
           pubspec,
-          additionalSuffixes: [releaseItem.flavor, releaseItem.buildType],
+          additionalSuffixes: {releaseItem.flavor, releaseItem.buildType},
           includeDate: includeDateInFileName,
         );
         File newFile = File(
