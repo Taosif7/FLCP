@@ -64,6 +64,7 @@ class FileUtils {
           pubspec,
           additionalSuffixes: {releaseItem.flavor, releaseItem.buildType},
           includeDate: includeDateInFileName,
+          date: releaseItem.date,
         );
         File newFile = File(
           '${targetDir.path}/$releaseName.${releaseItem.type.name}',

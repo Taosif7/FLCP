@@ -72,6 +72,7 @@ class FileExtractors {
           flavor: flavor,
           type: ReleaseType.apk,
           buildType: buildType,
+          date: element.lastModifiedSync(),
         ));
       } else if (element is Directory) {
         files.addAll(extractAPKReleaseFiles(element));
@@ -110,6 +111,7 @@ class FileExtractors {
           flavor: flavor,
           type: ReleaseType.aab,
           buildType: buildType,
+          date: element.lastModifiedSync(),
         ));
       } else if (element is Directory) {
         files.addAll(extractAABReleaseFiles(element));
@@ -172,6 +174,7 @@ class FileExtractors {
           flavor: flavor,
           type: ReleaseType.ipa,
           buildType: buildType,
+          date: element.lastModifiedSync(),
         ));
       } else if (element is Directory) {
         files.addAll(extractIPAReleaseFiles(element));
@@ -196,9 +199,10 @@ class FileExtractors {
     files.add(
       ReleaseItem(
         path: directory.path,
-        flavor: null,
+        flavor: 'release',
+        buildType: null,
         type: ReleaseType.web,
-        buildType: 'release',
+        date: DateTime.now(),
       ),
     );
 
@@ -209,15 +213,18 @@ class FileExtractors {
     directory ??= Directory('build/windows/x64/runner/Release/');
 
     if (directory.existsSync() == false) {
-      CLIUtils.printVerbose("EXE build directory not found: ${directory.path}");
+      CLIUtils.printVerbose(
+          "MSIX build directory not found: ${directory.path}");
       directory = Directory('build/windows/runner/Release/');
     }
     if (directory.existsSync() == false) {
-      CLIUtils.printVerbose("EXE build directory not found: ${directory.path}");
+      CLIUtils.printVerbose(
+          "MSIX build directory not found: ${directory.path}");
       directory = Directory('build/windows/arm64/runner/Release/');
     }
     if (directory.existsSync() == false) {
-      CLIUtils.printVerbose("EXE build directory not found: ${directory.path}");
+      CLIUtils.printVerbose(
+          "MSIX build directory not found: ${directory.path}");
       return [];
     }
 
@@ -236,6 +243,7 @@ class FileExtractors {
               flavor: 'release',
               buildType: 'msix',
               type: ReleaseType.msix,
+              date: item.lastModifiedSync(),
             ),
           );
         }
@@ -263,14 +271,15 @@ class FileExtractors {
 
     List<ReleaseItem> files = [];
 
-    CLIUtils.printVerbose("Windows Build Found: ${directory.path}");
+    CLIUtils.printVerbose("EXE Build Found: ${directory.path}");
 
     files.add(
       ReleaseItem(
         path: directory.path,
-        flavor: 'windows',
+        flavor: 'release',
+        buildType: 'msix',
         type: ReleaseType.exe,
-        buildType: 'release',
+        date: DateTime.now(),
       ),
     );
 
