@@ -1,7 +1,25 @@
 # FLCP (Flutter Copy)
 
-A command line tool that automatically finds, renames, and copies Flutter build files to your
+A command-line tool that automatically finds, renames, and copies Flutter build files to your
 desktop using a standardized naming convention.
+
+## Features
+
+- Automatically locate and copy Flutter build files to your desktop
+- Standardized naming convention: `{projectName}_{flavor}_{version}_{mmddyy}`
+- Read project information directly from pubspec.yaml
+- Selective platform copying:
+  - Android: APK and AAB
+  - iOS: IPA
+  - Web: Zipped web build
+  - Windows: EXE and MSIX
+- Automatically packages web release files into a zip archive
+- Verbose mode for detailed operation logging
+
+## Prerequisites
+
+- Dart SDK
+- Flutter project with build files generated
 
 ## Installation
 
@@ -10,15 +28,6 @@ Install FLCP globally using:
 ```bash
 $ dart pub global activate flcp
 ```
-
-## Features
-
-- Automatically locates and copies Flutter build files to your desktop
-- Standardized naming convention: `{projectName}_{version}_{mmddyy}`
-- Reads project information directly from pubspec.yaml
-- Selective platform copying (Android APK/AAB, iOS IPA, Web builds)
-- Automatically packages web release files into a zip archive
-- Verbose mode for detailed operation logging
 
 ## Usage
 
@@ -44,14 +53,20 @@ $ flcp ios
 # Copy only web builds
 $ flcp web
 
+# Copy Windows builds
+$ flcp windows
+
 # Copy specific file types
 $ flcp apk aab
 $ flcp ipa
+
+# Copy multiple platforms
+$ flcp android ios
 ```
 
 ### Command Options
 
-```bash
+```
 Options:
   -h, --help       Print usage information
   -v, --verbose    Show additional command output
@@ -59,45 +74,26 @@ Options:
   -d, --no-date    Exclude date from the release file name
 ```
 
-### Important Notes
+## Requirements
 
 - Must be run from the root directory of your Flutter project
-- Requires a valid pubspec.yaml file
-- Build files must exist in their default Flutter output locations
-- Supported build types:
-  - Android: APK and AAB
-  - iOS: IPA
-  - Web: Build directory
-
-## Error Handling
-
-The tool provides clear error messages for common issues:
-
-- Missing pubspec.yaml file
-- Invalid pubspec.yaml format
-- No build files found
-- Unsupported platforms
-- Invalid command arguments
-
-## Limitations
-
-- Only copies release builds
-- Desktop builds not currently supported
-- Must be run from project root directory
+- Requires a valid `pubspec.yaml` file
+- Supports desktop environments (macOS, Windows, Linux)
 
 ## Version
 
 Current version: 1.0.0
 
-I've improved the documentation by:
+## Contributing
 
-1. Adding more detailed usage examples
-2. Including all available command flags
-3. Clarifying supported platforms and file types
-4. Adding error handling and limitations sections
-5. Providing more context around where and how to run the tool
-6. Making the naming convention match what's actually in the code
-7. Adding version information
-8. Restructuring for better readability and completeness
+Contributions are welcome! Please feel free to submit a Pull Request.
 
-Would you like me to expand on any particular section or add more specific examples?
+## License
+
+Read the [license file](LICENSE) for more information.
+
+## Author
+
+Taosif Jamal
+
+- [LinkedIn](https://www.linkedin.com/in/taosif7/)
