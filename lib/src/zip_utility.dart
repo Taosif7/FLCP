@@ -31,53 +31,104 @@ class ZipUtility {
       );
       return zipFile;
     } else if (Platform.isWindows) {
-      // Create a PowerShell script that preserves folder structure and handles exclusions
-      final tempScript = '''
-\$ErrorActionPreference = 'Stop'
+      // Get the directory and base name from the zip path
+      final lastSeparator = zipPath.lastIndexOf('\\');
+      final zipDirectory =
+          lastSeparator != -1 ? zipPath.substring(0, lastSeparator) : '.';
+      final zipBaseName =
+          zipPath.substring(lastSeparator + 1).replaceAll('.zip', '');
 
-# Function to check if a file should be excluded
-function ShouldExcludeFile(\$filePath) {
-    \$relativePath = \$filePath.Replace('${folder.path.replaceAll('\\', '/')}/', '').ToLower()
-    \$excludeFiles = @(${excludeFiles.map((f) => '"${f.toLowerCase().replaceAll('\\', '/')}"').join(', ')})
-    
-    foreach (\$excludePattern in \$excludeFiles) {
-        if (\$relativePath -like "*\$excludePattern*") {
-            return \$true
+      // Create the PowerShell script next to where the ZIP will be
+      final scriptPath = '$zipDirectory\\${zipBaseName}_script.ps1';
+      final tempFile = File(scriptPath);
+
+      // Create a PowerShell script that uses System.IO.Compression
+      final tempScript = '''
+# Define function to zip folder with exclusions
+function Compress-FolderWithExclusions {
+    param (
+        [Parameter(Mandatory = \$true)]
+        [string]\$SourceFolder,      # Path to the folder to zip
+        [Parameter(Mandatory = \$true)]
+        [string]\$DestinationZip,    # Path for the resulting ZIP file
+        [Parameter(Mandatory = \$false)]
+        [string[]]\$ExcludePatterns  # Array of file patterns to exclude
+    )
+
+    # Ensure System.IO.Compression.FileSystem is loaded
+    Add-Type -AssemblyName 'System.IO.Compression.FileSystem'
+
+    # Create a temporary folder for zipping
+    \$TempFolder = Join-Path -Path \$env:TEMP -ChildPath ([guid]::NewGuid().ToString())
+    New-Item -ItemType Directory -Path \$TempFolder | Out-Null
+
+    try {
+        # Copy the folder structure while excluding specified files
+        Get-ChildItem -Path \$SourceFolder -Recurse | ForEach-Object {
+            \$RelativePath = \$_.FullName.Substring(\$SourceFolder.Length).TrimStart('\\')
+            
+            # Check if the file matches any exclusion patterns
+            \$Exclude = \$false
+            foreach (\$Pattern in \$ExcludePatterns) {
+                if (\$_ -is [System.IO.FileInfo] -and (\$_.Name -like \$Pattern)) {
+                    \$Exclude = \$true
+                    break
+                }
+            }
+
+            if (-not \$Exclude) {
+                \$TargetPath = Join-Path -Path \$TempFolder -ChildPath \$RelativePath
+                
+                # Create directories or copy files as needed
+                if (\$_ -is [System.IO.DirectoryInfo]) {
+                    New-Item -ItemType Directory -Path \$TargetPath -Force | Out-Null
+                }
+                elseif (\$_ -is [System.IO.FileInfo]) {
+                    Copy-Item -Path \$_.FullName -Destination \$TargetPath
+                }
+            }
         }
+
+        # Create the ZIP file from the temp folder
+        [System.IO.Compression.ZipFile]::CreateFromDirectory(\$TempFolder, \$DestinationZip)
+        Write-Host "Successfully created ZIP: \$DestinationZip"
     }
-    return \$false
+    catch {
+        Write-Error "An error occurred: \$_"
+        throw
+    }
+    finally {
+        # Clean up the temporary folder
+        Remove-Item -Path \$TempFolder -Recurse -Force
+    }
 }
 
-# Get all files in the directory, excluding specified files
-\$filesToZip = Get-ChildItem -Path "${folder.path}" -Recurse -File | 
-    Where-Object { 
-        -not (ShouldExcludeFile \$_.FullName) 
-    } | 
-    Select-Object -ExpandProperty FullName
-
-# Compress files while maintaining directory structure
-Compress-Archive -Path \$filesToZip -DestinationPath "$zipPath"
+# Call the function with parameters
+Compress-FolderWithExclusions -SourceFolder "${folder.path}" -DestinationZip "$zipPath" -ExcludePatterns @(${excludeFiles.map((f) => "'$f'").join(', ')})
 ''';
 
-      final tempFile = File('${folder.path}/temp_zip_script.ps1');
-      tempFile.writeAsStringSync(tempScript);
+      try {
+        tempFile.writeAsStringSync(tempScript);
 
-      // Run the PowerShell script
-      final result = Process.runSync(
-        'powershell',
-        ['-ExecutionPolicy', 'Bypass', '-NoProfile', '-File', tempFile.path],
-        runInShell: true,
-      );
+        // Run the PowerShell script
+        final result = Process.runSync(
+          'powershell',
+          ['-ExecutionPolicy', 'Bypass', '-NoProfile', '-File', tempFile.path],
+          runInShell: true,
+        );
 
-      // Clean up temporary script
-      tempFile.deleteSync();
+        // Check for errors in script execution
+        if (result.exitCode != 0) {
+          throw Exception('Zip creation failed: ${result.stderr}');
+        }
 
-      // Check for errors in script execution
-      if (result.exitCode != 0) {
-        throw Exception('Zip creation failed: ${result.stderr}');
+        return zipFile;
+      } finally {
+        // Clean up the temporary script file
+        if (tempFile.existsSync()) {
+          tempFile.deleteSync();
+        }
       }
-
-      return zipFile;
     } else {
       throw Exception('Unsupported platform');
     }
