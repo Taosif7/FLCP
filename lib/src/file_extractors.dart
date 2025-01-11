@@ -83,7 +83,7 @@ class FileExtractors {
   }
 
   List<ReleaseItem> extractAABReleaseFiles([Directory? directory]) {
-    directory ??= Directory('build/app/outputs/aab/');
+    directory ??= Directory('build/app/outputs/bundles/');
 
     if (directory.existsSync() == false) {
       CLIUtils.printVerbose("AAB build directory not found");
