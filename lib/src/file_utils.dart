@@ -46,8 +46,11 @@ class FileUtils {
         );
         String zipFilePath = "${targetDir.path}/$releaseName.zip";
 
-        List<String> msixFilePaths =
-            exeReleaseDir.listSync().where((file) => file.path.endsWith('.msix')).map((file) => file.path).toList();
+        List<String> msixFilePaths = exeReleaseDir
+            .listSync()
+            .where((file) => file.path.endsWith('.msix'))
+            .map((file) => file.path)
+            .toList();
 
         ZipUtility zipUtility = ZipUtility();
         zipUtility.zipFiles(exeReleaseDir, zipFilePath, msixFilePaths);
@@ -65,7 +68,11 @@ class FileUtils {
         File file = File(releaseItem.path);
         String releaseName = PubspecUtils().getReleaseFileName(
           pubspec,
-          additionalSuffixes: {releaseItem.flavor, releaseItem.buildType, ...suffixes},
+          additionalSuffixes: {
+            releaseItem.flavor,
+            releaseItem.buildType,
+            ...suffixes
+          },
           includeDate: includeDateInFileName,
           date: releaseItem.date,
         );

@@ -22,7 +22,8 @@ class ZipUtility {
 
     if (Platform.isMacOS || Platform.isLinux) {
       // Use `zip` command, specifying folder contents
-      final excludeArgs = excludeFiles.map((file) => '--exclude=${folder.path}/$file').toList();
+      final excludeArgs =
+          excludeFiles.map((file) => '--exclude=${folder.path}/$file').toList();
       Process.runSync(
         'zip',
         [
@@ -37,8 +38,10 @@ class ZipUtility {
     } else if (Platform.isWindows) {
       // Get the directory and base name from the zip path
       final lastSeparator = zipPath.lastIndexOf('\\');
-      final zipDirectory = lastSeparator != -1 ? zipPath.substring(0, lastSeparator) : '.';
-      final zipBaseName = zipPath.substring(lastSeparator + 1).replaceAll('.zip', '');
+      final zipDirectory =
+          lastSeparator != -1 ? zipPath.substring(0, lastSeparator) : '.';
+      final zipBaseName =
+          zipPath.substring(lastSeparator + 1).replaceAll('.zip', '');
 
       // Create the PowerShell script next to where the ZIP will be
       final scriptPath = '$zipDirectory\\${zipBaseName}_script.ps1';

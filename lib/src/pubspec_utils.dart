@@ -11,7 +11,8 @@ class PubspecUtils {
 
     if (!pubspecFile.existsSync()) {
       // Try once more in parent directory (in case if user is in a platform directory)
-      CLIUtils.printVerbose('pubspec.yaml not found in current directory, checking in parent directory');
+      CLIUtils.printVerbose(
+          'pubspec.yaml not found in current directory, checking in parent directory');
       pubspecFile = File('../pubspec.yaml');
 
       // And if it still doesn't exist, then it's not a flutter project
@@ -45,7 +46,9 @@ class PubspecUtils {
         .where((e) => e.isNotEmpty && e != projectName)
         .map((e) => e.replaceAll(' ', '_').toLowerCase())
         .toSet();
-    filename += additionalSuffixes.isNotEmpty ? '_${additionalSuffixes.whereType<String>().join('_')}' : '';
+    filename += additionalSuffixes.isNotEmpty
+        ? '_${additionalSuffixes.whereType<String>().join('_')}'
+        : '';
     filename += '_v$versionName($buildNumber)';
 
     if (includeDate) {

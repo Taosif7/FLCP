@@ -90,7 +90,8 @@ void main(List<String> arguments) {
 
     if (pubspecFile == null) {
       CLIUtils.printError('pubspec.yaml file not found');
-      CLIUtils.printWarning("Please run this command in the root of your flutter project");
+      CLIUtils.printWarning(
+          "Please run this command in the root of your flutter project");
       return;
     }
 
@@ -107,17 +108,36 @@ void main(List<String> arguments) {
 
     CLIUtils.printInfo("Finding build files across the project...");
 
-    List<String> supportedPlatformsAndFiles = ["android", "ios", "web", "apk", "aab", "ipa"];
+    List<String> supportedPlatformsAndFiles = [
+      "android",
+      "ios",
+      "web",
+      "apk",
+      "aab",
+      "ipa"
+    ];
 
-    bool noExplicitPlatform = arguments.any((platform) => supportedPlatformsAndFiles.contains(platform)) == false;
+    bool noExplicitPlatform = arguments
+            .any((platform) => supportedPlatformsAndFiles.contains(platform)) ==
+        false;
 
     List<ReleaseItem> releases = FileExtractors().getBuildFiles(
-      apk: noExplicitPlatform || arguments.contains("android") || arguments.contains("apk"),
-      aab: noExplicitPlatform || arguments.contains("android") || arguments.contains("aab"),
-      ios: noExplicitPlatform || arguments.contains("ios") || arguments.contains("ipa"),
+      apk: noExplicitPlatform ||
+          arguments.contains("android") ||
+          arguments.contains("apk"),
+      aab: noExplicitPlatform ||
+          arguments.contains("android") ||
+          arguments.contains("aab"),
+      ios: noExplicitPlatform ||
+          arguments.contains("ios") ||
+          arguments.contains("ipa"),
       web: noExplicitPlatform || arguments.contains("web"),
-      msix: noExplicitPlatform || arguments.contains("windows") || arguments.contains("msix"),
-      exe: noExplicitPlatform || arguments.contains("windows") || arguments.contains("exe"),
+      msix: noExplicitPlatform ||
+          arguments.contains("windows") ||
+          arguments.contains("msix"),
+      exe: noExplicitPlatform ||
+          arguments.contains("windows") ||
+          arguments.contains("exe"),
     );
 
     if (releases.isEmpty) {
