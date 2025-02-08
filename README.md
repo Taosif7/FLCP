@@ -80,10 +80,6 @@ Options:
 - Requires a valid `pubspec.yaml` file
 - Supports desktop environments (macOS, Windows, Linux)
 
-## Version
-
-Current version: 1.0.0
-
 ## Contributing
 
 Contributions are welcome! Please feel free to submit a Pull Request.

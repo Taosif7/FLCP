@@ -10,6 +10,7 @@ import 'package:pubspec_parse/pubspec_parse.dart';
 
 const String version = '1.0.0';
 
+/// Sets up the argument parser for the FLCP tool.
 ArgParser buildParser() {
   return ArgParser()
     ..addFlag(
@@ -38,11 +39,16 @@ ArgParser buildParser() {
     );
 }
 
+/// Prints the usage information.
 void printUsage(ArgParser argParser) {
   print('Usage: dart flcp.dart <flags> [arguments]');
   print(argParser.usage);
 }
 
+/// Entry point for the FLCP tool.
+///
+/// Parses command-line arguments, reads project info, scans for build files,
+/// and copies them to the desktop.
 void main(List<String> arguments) {
   final ArgParser argParser = buildParser();
   try {
@@ -75,8 +81,7 @@ void main(List<String> arguments) {
 
     if (pubspecFile == null) {
       CLIUtils.printError('pubspec.yaml file not found');
-      CLIUtils.printWarning(
-          "Please run this command in the root of your flutter project");
+      CLIUtils.printWarning("Please run this command in the root of your flutter project");
       return;
     }
 
@@ -93,36 +98,17 @@ void main(List<String> arguments) {
 
     CLIUtils.printInfo("Finding build files across the project...");
 
-    List<String> supportedPlatformsAndFiles = [
-      "android",
-      "ios",
-      "web",
-      "apk",
-      "aab",
-      "ipa"
-    ];
+    List<String> supportedPlatformsAndFiles = ["android", "ios", "web", "apk", "aab", "ipa"];
 
-    bool noExplicitPlatform = arguments
-            .any((platform) => supportedPlatformsAndFiles.contains(platform)) ==
-        false;
+    bool noExplicitPlatform = arguments.any((platform) => supportedPlatformsAndFiles.contains(platform)) == false;
 
     List<ReleaseItem> releases = FileExtractors().getBuildFiles(
-      apk: noExplicitPlatform ||
-          arguments.contains("android") ||
-          arguments.contains("apk"),
-      aab: noExplicitPlatform ||
-          arguments.contains("android") ||
-          arguments.contains("aab"),
-      ios: noExplicitPlatform ||
-          arguments.contains("ios") ||
-          arguments.contains("ipa"),
+      apk: noExplicitPlatform || arguments.contains("android") || arguments.contains("apk"),
+      aab: noExplicitPlatform || arguments.contains("android") || arguments.contains("aab"),
+      ios: noExplicitPlatform || arguments.contains("ios") || arguments.contains("ipa"),
       web: noExplicitPlatform || arguments.contains("web"),
-      msix: noExplicitPlatform ||
-          arguments.contains("windows") ||
-          arguments.contains("msix"),
-      exe: noExplicitPlatform ||
-          arguments.contains("windows") ||
-          arguments.contains("exe"),
+      msix: noExplicitPlatform || arguments.contains("windows") || arguments.contains("msix"),
+      exe: noExplicitPlatform || arguments.contains("windows") || arguments.contains("exe"),
     );
 
     if (releases.isEmpty) {

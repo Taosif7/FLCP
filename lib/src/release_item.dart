@@ -1,5 +1,6 @@
 import 'package:flcp/src/extensions.dart';
 
+/// An enumeration of release file types.
 enum ReleaseType {
   apk(false, 'apk'),
   aab(false, 'aab'),
@@ -14,6 +15,8 @@ enum ReleaseType {
   const ReleaseType(this.isFolder, this.extension);
 }
 
+/// Represents a release item with file [path], release [type],
+/// an optional [flavor], optional [buildType] and [date] stamp.
 class ReleaseItem {
   final String path;
   final ReleaseType type;
@@ -22,6 +25,7 @@ class ReleaseItem {
 
   final DateTime date;
 
+  /// Returns the file name or 'folder' for web/exe types.
   String get fileName {
     if (type == ReleaseType.web || type == ReleaseType.exe) {
       return 'folder';

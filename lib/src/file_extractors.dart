@@ -4,7 +4,10 @@ import 'package:flcp/src/cli_utils.dart';
 import 'package:flcp/src/extensions.dart';
 import 'package:flcp/src/release_item.dart';
 
+/// Contains functions to scan directories and extract release items
+/// for various platforms and build types.
 class FileExtractors {
+  /// Retrieves build files for different platforms based on provided boolean flags.
   List<ReleaseItem> getBuildFiles({
     bool apk = true,
     bool aab = true,
@@ -43,6 +46,7 @@ class FileExtractors {
     return buildFiles;
   }
 
+  /// Extracts APK release files from a specified [directory] or the default location.
   List<ReleaseItem> extractAPKReleaseFiles([Directory? directory]) {
     directory ??= Directory('build/app/outputs/flutter-apk/');
 
@@ -82,6 +86,7 @@ class FileExtractors {
     return files;
   }
 
+  /// Extracts AAB release files from a specified [directory] or the default location.
   List<ReleaseItem> extractAABReleaseFiles([Directory? directory]) {
     directory ??= Directory('build/app/outputs/bundles/');
 
@@ -121,6 +126,7 @@ class FileExtractors {
     return files;
   }
 
+  /// Extracts IPA release files from a specified [directory] or the default location.
   List<ReleaseItem> extractIPAReleaseFiles([Directory? directory]) {
     directory ??= Directory('build/ios/ipa/');
 
@@ -184,6 +190,7 @@ class FileExtractors {
     return files;
   }
 
+  /// Extracts web release items from a specified [directory] or the default location.
   List<ReleaseItem> extractWebReleaseFiles([Directory? directory]) {
     directory ??= Directory('build/web/');
 
@@ -209,6 +216,7 @@ class FileExtractors {
     return files;
   }
 
+  /// Extracts MSIX release files from a specified [directory] or fallback locations.
   List<ReleaseItem> extractMSIXReleaseFiles([Directory? directory]) {
     directory ??= Directory('build/windows/x64/runner/Release/');
 
@@ -253,6 +261,7 @@ class FileExtractors {
     return files;
   }
 
+  /// Extracts EXE release items from a specified [directory] or fallback locations.
   List<ReleaseItem> extractEXEReleaseFiles([Directory? directory]) {
     directory ??= Directory('build/windows/x64/runner/Release/');
 

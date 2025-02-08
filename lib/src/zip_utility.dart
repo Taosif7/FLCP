@@ -1,6 +1,11 @@
 import 'dart:io';
 
+/// Provides utility functions for creating ZIP archives from a directory.
 class ZipUtility {
+  /// Zips the contents of [folder] into a file at [zipPath].
+  ///
+  /// Optionally, files matching any name in [excludeFiles] are excluded.
+  /// Throws an [Exception] if [folder] doesn't exist or if the platform is unsupported.
   File zipFiles(
     Directory folder,
     String zipPath, [
@@ -17,8 +22,7 @@ class ZipUtility {
 
     if (Platform.isMacOS || Platform.isLinux) {
       // Use `zip` command, specifying folder contents
-      final excludeArgs =
-          excludeFiles.map((file) => '--exclude=${folder.path}/$file').toList();
+      final excludeArgs = excludeFiles.map((file) => '--exclude=${folder.path}/$file').toList();
       Process.runSync(
         'zip',
         [
@@ -33,10 +37,8 @@ class ZipUtility {
     } else if (Platform.isWindows) {
       // Get the directory and base name from the zip path
       final lastSeparator = zipPath.lastIndexOf('\\');
-      final zipDirectory =
-          lastSeparator != -1 ? zipPath.substring(0, lastSeparator) : '.';
-      final zipBaseName =
-          zipPath.substring(lastSeparator + 1).replaceAll('.zip', '');
+      final zipDirectory = lastSeparator != -1 ? zipPath.substring(0, lastSeparator) : '.';
+      final zipBaseName = zipPath.substring(lastSeparator + 1).replaceAll('.zip', '');
 
       // Create the PowerShell script next to where the ZIP will be
       final scriptPath = '$zipDirectory\\${zipBaseName}_script.ps1';

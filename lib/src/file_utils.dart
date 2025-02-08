@@ -5,7 +5,10 @@ import 'package:flcp/src/release_item.dart';
 import 'package:flcp/src/zip_utility.dart';
 import 'package:pubspec_parse/pubspec_parse.dart';
 
+/// Utility functions for file operations such as determining desktop path
+/// and copying release files.
 class FileUtils {
+  /// Returns the desktop directory if available, otherwise null.
   Directory? getDesktopPath() {
     Directory? dir;
     if (Platform.isMacOS) {
@@ -23,6 +26,8 @@ class FileUtils {
     return null;
   }
 
+  /// Copies release files to the [targetDir] using project [pubspec]
+  /// information. Includes date in file names based on [includeDateInFileName].
   List<File> copyReleaseFiles(
     Directory targetDir,
     List<ReleaseItem> releaseItems,
@@ -40,11 +45,8 @@ class FileUtils {
         );
         String zipFilePath = "${targetDir.path}/$releaseName.zip";
 
-        List<String> msixFilePaths = exeReleaseDir
-            .listSync()
-            .where((file) => file.path.endsWith('.msix'))
-            .map((file) => file.path)
-            .toList();
+        List<String> msixFilePaths =
+            exeReleaseDir.listSync().where((file) => file.path.endsWith('.msix')).map((file) => file.path).toList();
 
         ZipUtility zipUtility = ZipUtility();
         zipUtility.zipFiles(exeReleaseDir, zipFilePath, msixFilePaths);
