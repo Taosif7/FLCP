@@ -1,5 +1,5 @@
 name: flcp
-description: A sample command-line application with basic argument parsing.
+description: A command-line tool that automatically finds, renames, and copies Flutter build files to your desktop using a standardized naming convention.
 repository: https://github.com/Taosif7/flcp
 version: 1.0.0
 
