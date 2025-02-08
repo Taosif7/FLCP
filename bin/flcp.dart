@@ -8,7 +8,7 @@ import 'package:flcp/src/pubspec_utils.dart';
 import 'package:flcp/src/release_item.dart';
 import 'package:pubspec_parse/pubspec_parse.dart';
 
-const String version = '1.0.0';
+const String version = '1.0.1';
 
 /// Sets up the argument parser for the FLCP tool.
 ArgParser buildParser() {
@@ -36,6 +36,11 @@ ArgParser buildParser() {
       abbr: 'd',
       defaultsTo: false,
       help: 'Do not include the date in the release file name.',
+    )
+    ..addOption(
+      'suffix',
+      abbr: 's',
+      help: 'Add a suffix to the release file name.',
     );
 }
 
@@ -54,6 +59,7 @@ void main(List<String> arguments) {
   try {
     final ArgResults results = argParser.parse(arguments);
     bool includeDate = true;
+    String? nameSuffix;
 
     // Process the parsed arguments.
     if (results.wasParsed('help')) {
@@ -69,6 +75,9 @@ void main(List<String> arguments) {
     }
     if (results.wasParsed('no-date')) {
       includeDate = false;
+    }
+    if (results.wasParsed('suffix')) {
+      nameSuffix = results.option('suffix');
     }
 
     // Read project info
@@ -139,6 +148,7 @@ void main(List<String> arguments) {
       releases,
       pubspec,
       includeDate,
+      nameSuffix != null ? [nameSuffix] : [],
     );
 
     CLIUtils.printSuccess("Copied ${releases.length} build files to Desktop");

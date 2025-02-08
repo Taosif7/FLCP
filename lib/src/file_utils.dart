@@ -32,15 +32,16 @@ class FileUtils {
     Directory targetDir,
     List<ReleaseItem> releaseItems,
     Pubspec pubspec,
-    bool includeDateInFileName,
-  ) {
+    bool includeDateInFileName, [
+    List<String> suffixes = const [],
+  ]) {
     List<File> copiedFiles = [];
     for (ReleaseItem releaseItem in releaseItems) {
       if (releaseItem.type == ReleaseType.exe) {
         Directory exeReleaseDir = Directory(releaseItem.path);
         String releaseName = PubspecUtils().getReleaseFileName(
           pubspec,
-          additionalSuffixes: {'windows'},
+          additionalSuffixes: {'windows', ...suffixes},
           includeDate: includeDateInFileName,
         );
         String zipFilePath = "${targetDir.path}/$releaseName.zip";
@@ -54,7 +55,7 @@ class FileUtils {
         Directory webReleaseDir = Directory(releaseItem.path);
         String releaseName = PubspecUtils().getReleaseFileName(
           pubspec,
-          additionalSuffixes: {'web'},
+          additionalSuffixes: {'web', ...suffixes},
           includeDate: includeDateInFileName,
         );
         String zipFilePath = "${targetDir.path}/$releaseName.zip";
@@ -64,7 +65,7 @@ class FileUtils {
         File file = File(releaseItem.path);
         String releaseName = PubspecUtils().getReleaseFileName(
           pubspec,
-          additionalSuffixes: {releaseItem.flavor, releaseItem.buildType},
+          additionalSuffixes: {releaseItem.flavor, releaseItem.buildType, ...suffixes},
           includeDate: includeDateInFileName,
           date: releaseItem.date,
         );
