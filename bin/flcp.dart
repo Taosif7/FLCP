@@ -8,7 +8,7 @@ import 'package:flcp/src/pubspec_utils.dart';
 import 'package:flcp/src/release_item.dart';
 import 'package:pubspec_parse/pubspec_parse.dart';
 
-const String version = '1.0.1';
+const String version = '1.1.0';
 
 /// Sets up the argument parser for the FLCP tool.
 ArgParser buildParser() {
