@@ -11,14 +11,14 @@ class FileUtils {
   /// Returns the desktop directory if available, otherwise null.
   Directory? getDesktopPath() {
     Directory? dir;
-    if (Platform.isMacOS) {
+    if (Platform.isMacOS || Platform.isLinux) {
       dir = Directory("${Platform.environment['HOME']}/Desktop");
     } else if (Platform.isWindows) {
       final userProfile = Platform.environment['USERPROFILE'];
       if (userProfile != null) {
         dir = Directory("$userProfile\\Desktop");
       }
-    } else if (Platform.isLinux) {}
+    }
 
     if (dir != null && dir.existsSync()) {
       return dir;
