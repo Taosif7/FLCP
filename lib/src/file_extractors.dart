@@ -88,7 +88,7 @@ class FileExtractors {
 
   /// Extracts AAB release files from a specified [directory] or the default location.
   List<ReleaseItem> extractAABReleaseFiles([Directory? directory]) {
-    directory ??= Directory('build/app/outputs/bundles/');
+    directory ??= Directory('build/app/outputs/bundles/release');
 
     if (directory.existsSync() == false) {
       CLIUtils.printVerbose("AAB build directory not found");
